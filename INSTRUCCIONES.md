@@ -8,13 +8,13 @@ correcciones acordadas en el proyecto.
 - Grupo con 3 unidades de negocio: **Farmacias, Laboratorio, Medicina**.
 - Dashboard = HTML único con dos pestañas: **2025** (cerrado Ene–Dic, foto fija) y
   **2026** (en curso).
-- Siempre dos versiones: archivo **real** (`Dashboard - WS - <Mmm><YY>.html`) y archivo
+- Siempre dos versiones: archivo **real** (`Dashboard - WS - <MMM><YY>.html`) y archivo
   **DEMO** (ilustrativo, generado desde el real). Ver §10 para la convención de nombres.
 
 ## 2. Archivos a proveer cada mes
 
 - P&L del mes: `Economico_y_PL_MM2026_vs_BDGT.xlsx`, hoja **`REAL-BDGT2026`**.
-- Dashboard del mes anterior (`Dashboard - WS - <Mmm><YY>.html` real, no el DEMO).
+- Dashboard del mes anterior (`Dashboard - WS - <MMM><YY>.html` real, no el DEMO).
 
 ## 3. Mapa de columnas (hoja REAL-BDGT2026)
 
@@ -120,10 +120,10 @@ meses (verificar igualmente contra cols X..AI).
 
 ## 10. Nombres de archivo  ⬅️ CONVENCIÓN VIGENTE
 
-- Real: **`Dashboard - WS - <Mmm><YY>.html`** (ej. `Dashboard - WS - May26.html`).
-- Demo: **`Dashboard - WS - <Mmm><YY> - DEMO.html`** (ej. `Dashboard - WS - May26 - DEMO.html`).
-- `<Mmm>` = mes abreviado a 3 letras en español, sólo la inicial en mayúscula
-  (Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic); `<YY>` = año a 2 dígitos.
+- Real: **`Dashboard - WS - <MMM><YY>.html`** (ej. `Dashboard - WS - MAY26.html`).
+- Demo: **`Dashboard - WS - <MMM><YY> - DEMO.html`** (ej. `Dashboard - WS - MAY26 - DEMO.html`).
+- `<MMM>` = mes abreviado a 3 letras en MAYÚSCULAS
+  (ENE, FEB, MAR, ABR, MAY, JUN, JUL, AGO, SEP, OCT, NOV, DIC); `<YY>` = año a 2 dígitos.
 - El DEMO se genera **desde el real** (escalado + márgenes fijos). Ver §"Versión DEMO".
 - Si hay correcciones sobre el mismo mes, se sobrescribe el mismo archivo (no se versiona con V01/V02).
 
