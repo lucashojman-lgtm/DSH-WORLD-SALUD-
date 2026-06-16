@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard World Salud</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  font-family: Arial, sans-serif;
+  background: #d0d8e4;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dashboard-root {
+  width: 1400px;
+  min-width: 1400px;
+  background: #f0f4f8;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  margin: 16px auto;
+}
+
+/* TABS */
+.tab-nav {
+  display: flex;
+  background: #073763;
+  padding: 0 20px;
+  gap: 4px;
+  align-items: flex-end;
+}
+.tab-btn {
+  padding: 8px 28px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #9FC5E8;
+  background: #05264a;
+  border: none;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+}
+.tab-btn:hover { background: #0b4f8a; color: #fff; }
+.tab-btn.active { background: #f0f4f8; color: #073763; }
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 8px 20px;
+  border-bottom: 3px solid #9FC5E8;
+}
+.header img { height: 44px; }
+.header-title {
+  font-size: 13px;
+  color: #073763;
+  font-weight: bold;
+  text-align: right;
+  line-height: 1.4;
+}
+
+/* SECTION LABELS */
+.section-bar {
+  background: #9FC5E8;
+  color: #073763;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 5px 14px;
+  letter-spacing: 0.5px;
+}
+.section-bar.green {
+  background: #b6d7a8;
+  color: #1c4a1c;
+}
+
+/* DASH BODY */
+.dash-body { padding: 0; background: #e8eef5; }
+
+/* GRIDS */
+.row-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+.row-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+.row-pie-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.85fr;
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+.row-3col-narrow {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+
+/* CHART CARD */
+.card {
+  background: #fff;
+  border: 1px solid #cdd8e8;
+  border-radius: 3px;
+  padding: 7px 7px 5px;
+}
+.card.blank {
+  background: #fff;
+  border: 1px solid #cdd8e8;
+  border-radius: 3px;
+}
+.chart-wrap { position: relative; height: 178px; }
+
+/* INFO TOOLTIP */
+.chart-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #9FC5E8;
+  color: #073763;
+  font-size: 9px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px;
+  flex-shrink: 0;
+  position: relative;
+  line-height: 1;
+  user-select: none;
+}
+.chart-info:hover .info-bubble {
+  display: block;
+}
+.info-bubble {
+  display: none;
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #073763;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: normal;
+  line-height: 1.5;
+  padding: 8px 11px;
+  border-radius: 5px;
+  width: 220px;
+  z-index: 999;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  pointer-events: none;
+  text-align: left;
+}
+.info-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #073763;
+}
+.card h3 {
+  text-align: center;
+  font-size: 9.5px;
+  color: #073763;
+  margin-bottom: 4px;
+  font-weight: bold;
+  line-height: 1.2;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+
+
+/* PAMI TABLE */
+.pami-section { padding: 5px; background: #e8eef5; }
+.pami-table-wrap { background:#fff; border:1px solid #cdd8e8; border-radius:3px; padding:10px 12px; overflow-x:auto; }
+.pami-table-wrap h3 { text-align:center; font-size:10.5px; color:#073763; font-weight:bold; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.4px; }
+.pami-table { width:100%; border-collapse:collapse; font-size:9.5px; }
+.pami-table th { background:#073763; color:#fff; padding:5px 8px; text-align:center; font-size:9px; font-weight:bold; white-space:nowrap; border:1px solid #05264a; }
+.pami-table th.th-row { background:#9FC5E8; color:#073763; text-align:left; min-width:160px; }
+.pami-table td { padding:4px 8px; text-align:right; border:1px solid #dde5f0; white-space:nowrap; }
+.pami-table td.td-label { text-align:left; font-weight:bold; color:#073763; background:#f4f8fc; }
+.pami-table td.td-sub { text-align:left; color:#444; background:#fafcff; padding-left:18px; font-style:italic; }
+.pami-table tr.tr-total { background:#e8f0f8; font-weight:bold; }
+.pami-table tr.tr-sp td { background:#fff8f0; }
+.pami-table tr.tr-bud td { background:#f4f8fc; }
+.pami-table td.neg { color:#c0392b; font-weight:bold; }
+.pami-table td.pos { color:#1e7e34; }
+.pami-table tr.tr-sep td { background:#9FC5E8; height:3px; padding:0; border:none; }
+.pami-table td.pct { color:#555; font-size:8.5px; }
+
+/* TOGGLE BUDGET BUTTON */
+.btn-toggle-bud {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #073763;
+  background: #e8f0f8;
+  border: 2px solid #9FC5E8;
+  border-radius: 5px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.btn-toggle-bud:hover { background: #d0e4f5; border-color: #073763; }
+.btn-toggle-bud.active { background: #073763; color: #fff; border-color: #073763; }
+.btn-toggle-bud .dot { width:9px; height:9px; border-radius:50%; background:#9FC5E8; flex-shrink:0; }
+.btn-toggle-bud.active .dot { background:#FFD666; }
+
+/* Note banner for 2026 */
+.note-banner {
+  background: #e8f0f8;
+  border-left: 4px solid #073763;
+  color: #073763;
+  font-size: 11px;
+  padding: 6px 14px;
+  font-style: italic;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* KPI CARDS */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  padding: 5px;
+  background: #e8eef5;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid #cdd8e8;
+  border-radius: 4px;
+  padding: 10px 8px 8px;
+  text-align: center;
+}
+.kpi-label {
+  font-size: 8.5px;
+  color: #073763;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.kpi-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #073763;
+  line-height: 1;
+}
+.kpi-sub {
+  font-size: 9px;
+  color: #666;
+  margin-top: 3px;
+}
+.kpi-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+.kpi-pill.green  { background: #d9ead3; color: #276226; }
+.kpi-pill.red    { background: #fce8e6; color: #c0392b; }
+.kpi-pill.yellow { background: #fef9e7; color: #b7770d; }
+/* WATERFALL */
+.row-waterfall {
+  padding: 5px;
+  background: #e8eef5;
+}
+.row-waterfall .card { padding: 10px; }
+.chart-wrap-tall { position: relative; height: 200px; }
+/* YTD row uses same 3col narrow */
+</style>
+</head>
+<body>
+<div class="dashboard-root">
+
+<!-- TAB NAVIGATION -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('2026')">📈 2026</button>
+  <button class="tab-btn" onclick="switchTab('2025')">📊 2025</button>
+</div>
+
+<!-- ==================== PAGE 2025 ==================== -->
+<div id="page-2025" class="page">
+
+<div class="header">
+  <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACEAk8DASIAAhEBAxEB/8QAHQABAAMAAwEBAQAAAAAAAAAAAAYHCAEEBQMCCf/EAFcQAAEDAgMDBAkPBwoEBwAAAAEAAgMEBQYHERIhMQgTQWEUIjZRcXSBkbIVFhcyN0JVc3WClKGxs9EYIzRSksHiNThTVmZyk6XS4yQzVGJDRISVoqTh/8QAGwEBAAMBAQEBAAAAAAAAAAAAAAQFBgMCAQf/xABAEQABAwICBQgHBgYCAwAAAAABAAIDBBEFMRIhQVFxBhMUYYGRocEyMzRSsdHwFRYiNVPxJEJictLhIyVUgrL/2gAMAwEAAhEDEQA/ANloiIiIiIiLPfKRzruOGLq/COEpI4rgxgdW1paHmDaGoYwHdtaEEk66ajTfw0IVgDOL8/nNiZspLg68ysOp6NvTTzblf8nqOKpqCZRcNF7KpxiokhhAYbElfluNcz67WqixNiyZrzrtw1M+yfBs7vMufXVmn/WDGX0ip/Fb5oKSmoaKGjo4I6enhYI4oo27LWNA0AAHAL76dZUs8o4r6qcW+upRxgz9sp+u1fz/APXVmn/WDGX0ip/FPXVmn/WDGX0ip/Ff0A06ymnWV8+8kf8A44+uxffsV36p+u1Ymy4z2xrha7xR3y4VV8te2G1NPVnamY3pLHntg4d5xIPDdxW0LVXUtzttNcaKZs1LVRNmhkbwcxwBB8xWQ+WZRUlLmlRT01PHFJVWuOWdzRpzjxJI3aPfOgA16gtB8nGR8uSWGHSOLiKVzdT3hI8D6gF5xqGGWlirI26JdmPrgvuGSSsnfTvdcBWEiIswrxERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERFgDNv3aMSfLcv3i3+sAZt+7RiT5bl+8Wp5Leuk4eaosd9Wzit/N9qFyuG+1C5WWV6iIiIshctcj2S7TvH8js++kV88mv3EMMeLyfevUwu+HMP3iobUXaxWy4TMZsNkqaRkrmt110BcCdNSdy7tvoqO3UcdHQUsFJTRDSOGCMMYwa66Bo3DerepxJs1FHTButpz7/mq+CidHUvnJ1O/0vuiIqhWCIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIqAz2z8fha8z4ZwnTU9Tcac7NXVzgujhf8AqNaCNpw6SToOG866U67lBZplxPrip27+HYMG7/4q8puT1XURiQWAO/8AYqrnxenheWG5I3LcKLDzeUDmmXtBxJT6Ej/yMH+lbfjJMbSeJAUXEMLmoNHnSDpXy6rdQ3rvR10dXfQB1b1+lgDNv3aMSfLcv3i3+sAZt+7RiT5bl+8VvyW9dJw81X476tnFb+b7ULlcN9qFyeCyyvURU3jHHOJLdii40NJcI44IJyyNphYdBoOk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y3VwLiQNe9qFZdTDHUU8kErdqORpY8d8EaEL6IoVbWOq5zMRYm3grDD6FtFTNgBuBfxN1Rdzw/iXBt97MtsdRJFG48zUwx7Ycw+9eBrp1g+RTLL/ABRim93sU9woGMomxOL5RTuZo7dpvJ0395WFominVGMCpi0ZYgXWtpbVXUuBmkm0oZSGXvo7PrsuormRhd2JLSzsZzGV1MS6Eu3B4PFhPRroN/fCre0XfGmEGuoRQziEOJEM9O57AektcP3HRXkmi50mKmGHmJGB7Nx2LrW4M2efpEUhY/eNqqA1WPsaN7BMBoKGTdK8QmJmnWT2zvAF5l8wpWW3G1Jb7fRVU1PtwGOXmyQ/TZ23E8BvDie8ry0RSI8dfE60cYa2x1Dedp3lRpeTrJmgyyFz7g6R3DYBsCdCg+ZWCTf9m424sZcY27LmuOjZmjgCegjoPkKnCKppaqSlkEkZsQrmro4qyIxSi4KpO14hxvhaMW+ahnkhj3Mjqadzw0d5rm9HlIXfdWY+xo3sEU3qfQybpXiJ0TCOsu7Z3gHFW7omitX4zGTzjYGh+/zsqdmBSBvNuqHFm7q3X3KisXYRq7ZiSlt9toameF0cQZK2MkSP98SRuG/zBXo3guUUOuxGSsYxrxrbt33/AGU7D8LjoXyOjOp5Grda+rxRERVytERERERERERERERFXF5zMkt99qrYLO2QQVBh2+yCNrQ6a6bKlUtFNVuLYhcjh5qHWV8FE0OndYHVkT8FY6IEUVTERERFTWeXdRR+JD03KwMr+4O1fFO9Nyr/ADy7qKPxIem5WBlf3B2r4p3puWnxD8og4+RWRw387qOB+LVJURFmFrkREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREWdsYd3F08fd6S0SVn/Miint2Nq8yNIE0vZETiNzmu3/UdR5FpeTDhz727x5rJ8rmno0btgd5LQA4Iq8pM1rMaaM1VBXsn2RtiNrXNB6iXDcvr7K2H/wDo7n/hM/1KsOD1oNubKthjmHkX50KfIoD7K2H/APo7n/hM/wBSeyth/wD6O5/4bP8AUn2RW/plfftvD/1Qoxnl3UUfiQ9NysDK/uDtXxTvTcqix/iFmJb8K2CnfFDHEIomu9u4ak6nTpJPBXRgegmtmE7bRVDdmaOAbbf1STtEeTVW+KsMOGQxP1Ovl2H5qjwaRs+LTzR622z7R8ivaREWWWxRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERePijD1rxBRczcYS4x6mOVh2XsPUf3HciLvTPcyVrmmxuo9WxskLmvFxbaqcrMN0UNS+Ns9UQ06DVzf8ASvl636T+nqfO38ERfpAe62a/KXMbfJPW/Sf09T52/guPUCk/p6nzt/BEX3SdvXnQbuU/y6wdZomMu0jJampY/wDN884FrD3wABv8OqsIIiwmMvc6qcHG9l+kYFGxlE0tAF0REVUrhERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERf/Z" alt="World Salud Logo">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <button class="btn-toggle-bud" id="btn-bud-25" onclick="toggleBudget('25')">
+      <span class="dot"></span> Ocultar Budget sin Real
+    </button>
+    <div class="header-title">DASHBOARD<br>Diciembre 2025</div>
+  </div>
+</div>
+
+<div class="dash-body">
+
+<!-- TABLA PAMI 2025 — ARRIBA -->
+<div class="section-bar">RESUMEN COMPARATIVO — REAL vs REAL SIN PAMI (Acumulado Ene–Dic 2025)</div>
+<div class="pami-section">
+<div class="pami-table-wrap">
+<table class="pami-table" id="tbl-pami-25">
+<thead>
+<tr>
+  <th class="th-row" style="min-width:200px;">Principales Números<br><span style="font-weight:normal;font-size:8px;">Acumulado Ene–Dic 2025</span></th>
+  <th>Ingresos Netos</th>
+  <th>Costos Operativos</th>
+  <th>Otros Egresos</th>
+  <th>Resultado</th>
+  <th>MB REAL</th>
+  <th>MB BUDGET</th>
+  <th>MN REAL</th>
+  <th>MN BUDGET</th>
+</tr>
+</thead>
+<tbody id="tbody-pami-25"></tbody>
+</table>
+</div>
+</div>
+
+<!-- SECTION 1: INGRESOS SIN IIBB GENERAL -->
+<div class="section-bar">INGRESOS SIN IIBB GENERAL</div>
+<div class="row-4col">
+  <div class="card"><h3>Ingresos Netos IIBB Reales vs Budget<span class="chart-info">?<span class="info-bubble">Compara los ingresos netos mensuales reales (sin IIBB) contra el presupuesto. Permite identificar meses con desvíos positivos o negativos respecto al plan.</span></span></h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
+  <div class="card"><h3>Ingresos Netos IIBB vs Costos<span class="chart-info">?<span class="info-bubble">Muestra la relación mensual entre ingresos netos y costos operativos directos. La línea amarilla representa el Margen Bruto resultante.</span></span></h3><div class="chart-wrap"><canvas id="c4"></canvas></div></div>
+  <div class="card"><h3>Ingresos Netos IIBB vs Egresos<span class="chart-info">?<span class="info-bubble">Contrasta ingresos netos contra el total de egresos del período. La línea amarilla indica el Margen Neto mensual.</span></span></h3><div class="chart-wrap"><canvas id="c3"></canvas></div></div>
+  <div class="card"><h3>Egresos vs Budget<span class="chart-info">?<span class="info-bubble">Compara los costos operativos reales contra el presupuesto mensual. Permite detectar desvíos de gasto respecto al plan.</span></span></h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
+</div>
+
+<!-- SECTION 2: INGRESOS SIN IIBB POR NEGOCIO -->
+<div class="section-bar">INGRESOS SIN IIBB POR NEGOCIO</div>
+<div class="row-pie-3col">
+  <div class="card"><h3>Ingresos Farmacias – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Farmacias comparado contra el presupuesto. Principal unidad de negocio del grupo.</span></span></h3><div class="chart-wrap"><canvas id="c9"></canvas></div></div>
+  <div class="card"><h3>Ingresos Laboratorio – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Laboratorio vs presupuesto. Incluye la producción y distribución de productos propios.</span></span></h3><div class="chart-wrap"><canvas id="c10"></canvas></div></div>
+  <div class="card"><h3>Ingresos Medicina – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Medicina vs presupuesto. Refleja los servicios de atención médica del grupo.</span></span></h3><div class="chart-wrap"><canvas id="c11"></canvas></div></div>
+  <div class="card"><h3>Composición de Ingresos (Dic)<span class="chart-info">?<span class="info-bubble">Distribución porcentual de los ingresos del último mes cerrado entre los tres segmentos: Farmacias, Laboratorios y Medicina.</span></span></h3><div class="chart-wrap"><canvas id="c0"></canvas></div></div>
+</div>
+
+<!-- SECTION 3: RESULTADO -->
+<div class="section-bar">RESULTADO</div>
+<div class="row-4col">
+  <div class="card blank"></div>
+  <div class="card"><h3>Resultado Neto Real vs Budget<span class="chart-info">?<span class="info-bubble">Compara el resultado neto mensual real contra el presupuestado. Un valor positivo indica ganancia; negativo, pérdida en el período.</span></span></h3><div class="chart-wrap"><canvas id="c7"></canvas></div></div>
+  <div class="card"><h3>EBITDA Real vs Budget<span class="chart-info">?<span class="info-bubble">Resultado operativo antes de impuestos, intereses y amortizaciones. Mide la rentabilidad operativa pura del negocio contra el plan.</span></span></h3><div class="chart-wrap"><canvas id="c8"></canvas></div></div>
+  <div class="card blank"></div>
+</div>
+
+<!-- SECTION 4: INGRESOS - EGRESOS VS INFLACIÓN -->
+<div class="section-bar">INGRESOS SIN IIBB – EGRESOS VS INFLACIÓN</div>
+<div class="row-4col">
+  <div class="card blank"></div>
+  <div class="card"><h3>Ingresos vs Inflación<span class="chart-info">?<span class="info-bubble">Contrasta la evolución de los ingresos reales con el crecimiento por inflación proyectado. Si los ingresos crecen por encima, el negocio gana en términos reales.</span></span></h3><div class="chart-wrap"><canvas id="c5"></canvas></div></div>
+  <div class="card"><h3>Egresos vs Inflación<span class="chart-info">?<span class="info-bubble">Contrasta la evolución de los costos reales con la inflación proyectada. Si los egresos crecen por debajo, la empresa mejora su eficiencia en términos reales.</span></span></h3><div class="chart-wrap"><canvas id="c6"></canvas></div></div>
+  <div class="card blank"></div>
+</div>
+
+<!-- SECTION 5: REAL VS BUDGET -->
+<div class="section-bar">REAL VS BUDGET</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Ingresos vs Budget<span class="chart-info">?<span class="info-bubble">Compara ingresos reales contra presupuesto mensual. Permite evaluar el nivel de cumplimiento del plan comercial.</span></span></h3><div class="chart-wrap"><canvas id="c12"></canvas></div></div>
+  <div class="card"><h3>Ingresos y Costos Operativos vs Budget<span class="chart-info">?<span class="info-bubble">Vista combinada de ingresos y costos reales versus presupuesto. Permite analizar simultáneamente si se cumple el plan tanto en ventas como en gastos.</span></span></h3><div class="chart-wrap"><canvas id="c13"></canvas></div></div>
+  <div class="card"><h3>Costos Operativos vs Budget<span class="chart-info">?<span class="info-bubble">Evolución de los costos operativos reales vs presupuesto. La brecha entre ambas líneas indica el nivel de control del gasto.</span></span></h3><div class="chart-wrap"><canvas id="c14"></canvas></div></div>
+</div>
+
+
+<!-- SECTION 6: KPIs EJECUTIVOS 2025 -->
+<div class="section-bar">KPIs EJECUTIVOS</div>
+<div class="kpi-row" id="kpi-2025">
+  <div class="kpi-card">
+    <div class="kpi-label">Ingresos Netos IIBB YTD Real<span class="chart-info">?<span class="info-bubble">Total de ingresos netos acumulados en el año hasta el último mes cerrado, netos de IIBB. Compara contra el presupuesto acumulado del mismo período.</span></span></div>
+    <div class="kpi-value" id="k25-ing-ytd">—</div>
+    <div class="kpi-sub">vs Budget YTD</div>
+    <span class="kpi-pill" id="k25-ing-pct">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Resultado Neto YTD<span class="chart-info">?<span class="info-bubble">Resultado neto acumulado en el año. Es el indicador final de rentabilidad del negocio después de costos, egresos e impuestos.</span></span></div>
+    <div class="kpi-value" id="k25-rn-ytd">—</div>
+    <div class="kpi-sub">vs Budget YTD</div>
+    <span class="kpi-pill" id="k25-rn-pct">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Margen Neto % (Dic)<span class="chart-info">?<span class="info-bubble">Porcentaje de resultado neto sobre ingresos en el último mes cerrado. Muestra qué proporción de cada peso de ingreso se convierte en ganancia neta.</span></span></div>
+    <div class="kpi-value" id="k25-mn-pct">—</div>
+    <div class="kpi-sub">Último mes cerrado</div>
+    <span class="kpi-pill" id="k25-mn-pill">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">EBITDA Margin % (Dic)<span class="chart-info">?<span class="info-bubble">Margen operativo del último mes cerrado antes de intereses, impuestos y amortizaciones. Mide la rentabilidad operativa pura del negocio.</span></span></div>
+    <div class="kpi-value" id="k25-ebitda-pct">—</div>
+    <div class="kpi-sub">Último mes cerrado</div>
+    <span class="kpi-pill" id="k25-ebitda-pill">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Cumplimiento Budget Anual<span class="chart-info">?<span class="info-bubble">Porcentaje de ejecución del presupuesto anual de ingresos. Muestra qué tan cerca estuvo el año de alcanzar el objetivo planificado.</span></span></div>
+    <div class="kpi-value" id="k25-cumpl">—</div>
+    <div class="kpi-sub">Ingresos Netos IIBB Real / Budget</div>
+    <span class="kpi-pill" id="k25-cumpl-pill">—</span>
+  </div>
+</div>
+
+<!-- SECTION 7: ACUMULADO YTD 2025 -->
+<div class="section-bar">ACUMULADO AÑO (YTD)</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Ingresos Acumulados YTD<span class="chart-info">?<span class="info-bubble">Ingresos netos acumulados desde enero hasta el último mes cerrado, comparados contra el acumulado presupuestado. Refleja el cumplimiento del plan en el año.</span></span></h3><div class="chart-wrap"><canvas id="c15"></canvas></div></div>
+  <div class="card"><h3>Egresos Acumulados YTD<span class="chart-info">?<span class="info-bubble">Costos operativos acumulados desde enero, comparados contra el presupuesto acumulado. Permite evaluar la eficiencia del gasto en el año.</span></span></h3><div class="chart-wrap"><canvas id="c16"></canvas></div></div>
+  <div class="card"><h3>Resultado Neto Acumulado YTD<span class="chart-info">?<span class="info-bubble">Resultado neto acumulado desde enero hasta el último mes cerrado, versus el presupuesto acumulado. Indica la rentabilidad total del período.</span></span></h3><div class="chart-wrap"><canvas id="c17"></canvas></div></div>
+</div>
+
+<!-- SECTION 8: MÁRGENES 2025 -->
+<div class="section-bar">EVOLUCIÓN DE MÁRGENES</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Margen Bruto % Mensual<span class="chart-info">?<span class="info-bubble">Porcentaje de margen bruto mensual: (Ingresos − Costos Directos) / Ingresos. Mide la eficiencia operativa antes de otros egresos.</span></span></h3><div class="chart-wrap"><canvas id="c18"></canvas></div></div>
+  <div class="card"><h3>Margen Neto % Mensual<span class="chart-info">?<span class="info-bubble">Porcentaje de margen neto mensual: Resultado Neto / Ingresos. Refleja la rentabilidad final del negocio después de todos los costos y egresos.</span></span></h3><div class="chart-wrap"><canvas id="c19"></canvas></div></div>
+  <div class="card"><h3>Cascada Anual<span class="chart-info">?<span class="info-bubble">Descomposición del resultado: desde los ingresos brutos, restando IIBB, costos directos y otros egresos hasta llegar al resultado neto final del año.</span></span></h3><div class="chart-wrap-tall"><canvas id="c20"></canvas></div></div>
+</div>
+
+
+</div><!-- dash-body -->
+</div><!-- page-2025 -->
+
+
+<!-- ==================== PAGE 2026 ==================== -->
+<div id="page-2026" class="page page-2026 active">
+
+<div class="header">
+  <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACEAk8DASIAAhEBAxEB/8QAHQABAAMAAwEBAQAAAAAAAAAAAAYHCAEEBQMCCf/EAFcQAAEDAgMDBAkPBwoEBwAAAAEAAgMEBQYHERIhMQgTQWEUIjZRcXSBkbIVFhcyN0JVc3WClKGxs9EYIzRSksHiNThTVmZyk6XS4yQzVGJDRISVoqTh/8QAGwEBAAMBAQEBAAAAAAAAAAAAAAQFBgMCAQf/xABAEQABAwICBQgHBgYCAwAAAAABAAIDBBEFMRIhQVFxBhMUYYGRocEyMzRSsdHwFRYiNVPxJEJictLhIyVUgrL/2gAMAwEAAhEDEQA/ANloiIiIiIiLPfKRzruOGLq/COEpI4rgxgdW1paHmDaGoYwHdtaEEk66ajTfw0IVgDOL8/nNiZspLg68ysOp6NvTTzblf8nqOKpqCZRcNF7KpxiokhhAYbElfluNcz67WqixNiyZrzrtw1M+yfBs7vMufXVmn/WDGX0ip/Fb5oKSmoaKGjo4I6enhYI4oo27LWNA0AAHAL76dZUs8o4r6qcW+upRxgz9sp+u1fz/APXVmn/WDGX0ip/FPXVmn/WDGX0ip/Ff0A06ymnWV8+8kf8A44+uxffsV36p+u1Ymy4z2xrha7xR3y4VV8te2G1NPVnamY3pLHntg4d5xIPDdxW0LVXUtzttNcaKZs1LVRNmhkbwcxwBB8xWQ+WZRUlLmlRT01PHFJVWuOWdzRpzjxJI3aPfOgA16gtB8nGR8uSWGHSOLiKVzdT3hI8D6gF5xqGGWlirI26JdmPrgvuGSSsnfTvdcBWEiIswrxERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERFgDNv3aMSfLcv3i3+sAZt+7RiT5bl+8Wp5Leuk4eaosd9Wzit/N9qFyuG+1C5WWV6iIiIshctcj2S7TvH8js++kV88mv3EMMeLyfevUwu+HMP3iobUXaxWy4TMZsNkqaRkrmt110BcCdNSdy7tvoqO3UcdHQUsFJTRDSOGCMMYwa66Bo3DerepxJs1FHTButpz7/mq+CidHUvnJ1O/0vuiIqhWCIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIqAz2z8fha8z4ZwnTU9Tcac7NXVzgujhf8AqNaCNpw6SToOG866U67lBZplxPrip27+HYMG7/4q8puT1XURiQWAO/8AYqrnxenheWG5I3LcKLDzeUDmmXtBxJT6Ej/yMH+lbfjJMbSeJAUXEMLmoNHnSDpXy6rdQ3rvR10dXfQB1b1+lgDNv3aMSfLcv3i3+sAZt+7RiT5bl+8VvyW9dJw81X476tnFb+b7ULlcN9qFyeCyyvURU3jHHOJLdii40NJcI44IJyyNphYdBoOk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y3VwLiQNe9qFZdTDHUU8kErdqORpY8d8EaEL6IoVbWOq5zMRYm3grDD6FtFTNgBuBfxN1Rdzw/iXBt97MtsdRJFG48zUwx7Ycw+9eBrp1g+RTLL/ABRim93sU9woGMomxOL5RTuZo7dpvJ0395WFominVGMCpi0ZYgXWtpbVXUuBmkm0oZSGXvo7PrsuormRhd2JLSzsZzGV1MS6Eu3B4PFhPRroN/fCre0XfGmEGuoRQziEOJEM9O57AektcP3HRXkmi50mKmGHmJGB7Nx2LrW4M2efpEUhY/eNqqA1WPsaN7BMBoKGTdK8QmJmnWT2zvAF5l8wpWW3G1Jb7fRVU1PtwGOXmyQ/TZ23E8BvDie8ry0RSI8dfE60cYa2x1Dedp3lRpeTrJmgyyFz7g6R3DYBsCdCg+ZWCTf9m424sZcY27LmuOjZmjgCegjoPkKnCKppaqSlkEkZsQrmro4qyIxSi4KpO14hxvhaMW+ahnkhj3Mjqadzw0d5rm9HlIXfdWY+xo3sEU3qfQybpXiJ0TCOsu7Z3gHFW7omitX4zGTzjYGh+/zsqdmBSBvNuqHFm7q3X3KisXYRq7ZiSlt9toameF0cQZK2MkSP98SRuG/zBXo3guUUOuxGSsYxrxrbt33/AGU7D8LjoXyOjOp5Grda+rxRERVytERERERERERERERFXF5zMkt99qrYLO2QQVBh2+yCNrQ6a6bKlUtFNVuLYhcjh5qHWV8FE0OndYHVkT8FY6IEUVTERERFTWeXdRR+JD03KwMr+4O1fFO9Nyr/ADy7qKPxIem5WBlf3B2r4p3puWnxD8og4+RWRw387qOB+LVJURFmFrkREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREWdsYd3F08fd6S0SVn/Miint2Nq8yNIE0vZETiNzmu3/UdR5FpeTDhz727x5rJ8rmno0btgd5LQA4Iq8pM1rMaaM1VBXsn2RtiNrXNB6iXDcvr7K2H/wDo7n/hM/1KsOD1oNubKthjmHkX50KfIoD7K2H/APo7n/hM/wBSeyth/wD6O5/4bP8AUn2RW/plfftvD/1Qoxnl3UUfiQ9NysDK/uDtXxTvTcqix/iFmJb8K2CnfFDHEIomu9u4ak6nTpJPBXRgegmtmE7bRVDdmaOAbbf1STtEeTVW+KsMOGQxP1Ovl2H5qjwaRs+LTzR622z7R8ivaREWWWxRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERePijD1rxBRczcYS4x6mOVh2XsPUf3HciLvTPcyVrmmxuo9WxskLmvFxbaqcrMN0UNS+Ns9UQ06DVzf8ASvl636T+nqfO38ERfpAe62a/KXMbfJPW/Sf09T52/guPUCk/p6nzt/BEX3SdvXnQbuU/y6wdZomMu0jJampY/wDN884FrD3wABv8OqsIIiwmMvc6qcHG9l+kYFGxlE0tAF0REVUrhERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERf/Z" alt="World Salud Logo">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <button class="btn-toggle-bud" id="btn-bud-26" onclick="toggleBudget('26')">
+      <span class="dot"></span> Ocultar Budget sin Real
+    </button>
+    <div class="header-title">DASHBOARD<br>Mayo 2026</div>
+  </div>
+</div>
+
+<div class="note-banner">
+  ⚠️ Datos Reales disponibles: Enero, Febrero, Marzo, Abril y Mayo 2026. Los meses Jun–Dic muestran únicamente el Budget 2026. Los valores de Ingresos son netos sin IIBB.
+</div>
+
+<div class="dash-body">
+
+<!-- TABLA PAMI 2026 — ARRIBA -->
+<div class="section-bar">RESUMEN COMPARATIVO — REAL vs REAL SIN PAMI (Acumulado Ene–May 2026)</div>
+<div class="pami-section">
+<div class="pami-table-wrap">
+<table class="pami-table" id="tbl-pami-26">
+<thead>
+<tr>
+  <th class="th-row" style="min-width:200px;">Principales Números<br><span style="font-weight:normal;font-size:8px;">Acumulado Ene–May 2026</span></th>
+  <th>Ingresos Netos</th>
+  <th>Costos Operativos</th>
+  <th>Otros Egresos</th>
+  <th>Resultado</th>
+  <th>MB REAL</th>
+  <th>MB BUDGET</th>
+  <th>MN REAL</th>
+  <th>MN BUDGET</th>
+</tr>
+</thead>
+<tbody id="tbody-pami-26"></tbody>
+</table>
+</div>
+</div>
+
+<!-- SECTION 1: INGRESOS SIN IIBB GENERAL -->
+<div class="section-bar">INGRESOS SIN IIBB GENERAL</div>
+<div class="row-4col">
+  <div class="card"><h3>Ingresos Netos IIBB Reales vs Budget<span class="chart-info">?<span class="info-bubble">Compara los ingresos netos mensuales reales (sin IIBB) contra el presupuesto. Permite identificar meses con desvíos positivos o negativos respecto al plan.</span></span></h3><div class="chart-wrap"><canvas id="b1"></canvas></div></div>
+  <div class="card"><h3>Ingresos Netos IIBB vs Costos<span class="chart-info">?<span class="info-bubble">Muestra la relación mensual entre ingresos netos y costos operativos directos. La línea amarilla representa el Margen Bruto resultante.</span></span></h3><div class="chart-wrap"><canvas id="b4"></canvas></div></div>
+  <div class="card"><h3>Ingresos Netos IIBB vs Egresos<span class="chart-info">?<span class="info-bubble">Contrasta ingresos netos contra el total de egresos del período. La línea amarilla indica el Margen Neto mensual.</span></span></h3><div class="chart-wrap"><canvas id="b3"></canvas></div></div>
+  <div class="card"><h3>Egresos vs Budget<span class="chart-info">?<span class="info-bubble">Compara los costos operativos reales contra el presupuesto mensual. Permite detectar desvíos de gasto respecto al plan.</span></span></h3><div class="chart-wrap"><canvas id="b2"></canvas></div></div>
+</div>
+
+<!-- SECTION 2: INGRESOS SIN IIBB POR NEGOCIO -->
+<div class="section-bar">INGRESOS SIN IIBB POR NEGOCIO</div>
+<div class="row-pie-3col">
+  <div class="card"><h3>Ingresos Farmacias – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Farmacias comparado contra el presupuesto. Principal unidad de negocio del grupo.</span></span></h3><div class="chart-wrap"><canvas id="b9"></canvas></div></div>
+  <div class="card"><h3>Ingresos Laboratorio – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Laboratorio vs presupuesto. Incluye la producción y distribución de productos propios.</span></span></h3><div class="chart-wrap"><canvas id="b10"></canvas></div></div>
+  <div class="card"><h3>Ingresos Medicina – Real vs Budget<span class="chart-info">?<span class="info-bubble">Evolución mensual de ingresos del segmento Medicina vs presupuesto. Refleja los servicios de atención médica del grupo.</span></span></h3><div class="chart-wrap"><canvas id="b11"></canvas></div></div>
+  <div class="card"><h3>Composición de Ingresos (May)<span class="chart-info">?<span class="info-bubble">Distribución porcentual de los ingresos del último mes cerrado entre los tres segmentos: Farmacias, Laboratorios y Medicina.</span></span></h3><div class="chart-wrap"><canvas id="b0"></canvas></div></div>
+</div>
+
+<!-- SECTION 3: RESULTADO -->
+<div class="section-bar">RESULTADO</div>
+<div class="row-4col">
+  <div class="card blank"></div>
+  <div class="card"><h3>Resultado Neto Real vs Budget<span class="chart-info">?<span class="info-bubble">Compara el resultado neto mensual real contra el presupuestado. Un valor positivo indica ganancia; negativo, pérdida en el período.</span></span></h3><div class="chart-wrap"><canvas id="b7"></canvas></div></div>
+  <div class="card"><h3>Resultado Operativo Real vs Budget<span class="chart-info">?<span class="info-bubble">Resultado operativo del período comparado contra el presupuesto. Refleja la capacidad generadora de valor del negocio sin efectos financieros.</span></span></h3><div class="chart-wrap"><canvas id="b8"></canvas></div></div>
+  <div class="card blank"></div>
+</div>
+
+<!-- SECTION 4: INGRESOS SIN IIBB – EGRESOS VS BUDGET -->
+<div class="section-bar">INGRESOS SIN IIBB – EGRESOS VS BUDGET</div>
+<div class="row-4col">
+  <div class="card blank"></div>
+  <div class="card"><h3>Ingresos vs Budget (línea)<span class="chart-info">?<span class="info-bubble">Visualización en línea de la evolución de ingresos reales vs presupuesto. Facilita ver la tendencia y la brecha acumulada a lo largo del año.</span></span></h3><div class="chart-wrap"><canvas id="b5"></canvas></div></div>
+  <div class="card"><h3>Egresos vs Budget<span class="chart-info">?<span class="info-bubble">Compara los costos operativos reales contra el presupuesto mensual. Permite detectar desvíos de gasto respecto al plan.</span></span></h3><div class="chart-wrap"><canvas id="b6"></canvas></div></div>
+  <div class="card blank"></div>
+</div>
+
+<!-- SECTION 5: REAL VS BUDGET -->
+<div class="section-bar">REAL VS BUDGET</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Ingresos vs Budget<span class="chart-info">?<span class="info-bubble">Compara ingresos reales contra presupuesto mensual. Permite evaluar el nivel de cumplimiento del plan comercial.</span></span></h3><div class="chart-wrap"><canvas id="b12"></canvas></div></div>
+  <div class="card"><h3>Ingresos y Costos Operativos vs Budget<span class="chart-info">?<span class="info-bubble">Vista combinada de ingresos y costos reales versus presupuesto. Permite analizar simultáneamente si se cumple el plan tanto en ventas como en gastos.</span></span></h3><div class="chart-wrap"><canvas id="b13"></canvas></div></div>
+  <div class="card"><h3>Costos vs Budget<span class="chart-info">?<span class="info-bubble">Evolución de los costos operativos reales vs presupuesto. La brecha entre ambas líneas indica el nivel de control del gasto.</span></span></h3><div class="chart-wrap"><canvas id="b14"></canvas></div></div>
+</div>
+
+
+<!-- SECTION 6: KPIs EJECUTIVOS 2026 -->
+<div class="section-bar">KPIs EJECUTIVOS</div>
+<div class="kpi-row" id="kpi-2026">
+  <div class="kpi-card">
+    <div class="kpi-label">Ingresos Netos IIBB YTD (Ene-May)<span class="chart-info">?<span class="info-bubble">Total de ingresos netos acumulados Ene–May 2026, netos de IIBB. Se compara contra el presupuesto acumulado de los mismos meses.</span></span></div>
+    <div class="kpi-value" id="k26-ing-ytd">—</div>
+    <div class="kpi-sub">vs Budget YTD</div>
+    <span class="kpi-pill" id="k26-ing-pct">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Resultado Neto YTD (Ene-May)<span class="chart-info">?<span class="info-bubble">Resultado neto acumulado Ene–May 2026. Indicador de rentabilidad acumulada del ejercicio.</span></span></div>
+    <div class="kpi-value" id="k26-rn-ytd">—</div>
+    <div class="kpi-sub">vs Budget YTD</div>
+    <span class="kpi-pill" id="k26-rn-pct">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Margen Neto % (May)<span class="chart-info">?<span class="info-bubble">Porcentaje de resultado neto sobre ingresos en Mayo 2026. Muestra qué proporción de cada peso de ingreso se convierte en ganancia neta.</span></span></div>
+    <div class="kpi-value" id="k26-mn-pct">—</div>
+    <div class="kpi-sub">Último mes cerrado</div>
+    <span class="kpi-pill" id="k26-mn-pill">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Resultado Operativo Margin % (May)<span class="chart-info">?<span class="info-bubble">Margen del resultado operativo sobre ingresos en Mayo 2026. Mide la rentabilidad operativa antes de efectos financieros e impuestos.</span></span></div>
+    <div class="kpi-value" id="k26-ebitda-pct">—</div>
+    <div class="kpi-sub">Último mes cerrado</div>
+    <span class="kpi-pill" id="k26-ebitda-pill">—</span>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Cumplimiento Budget YTD<span class="chart-info">?<span class="info-bubble">Porcentaje de ejecución del presupuesto acumulado Ene–May. Indica si el año está en línea con el plan comercial 2026.</span></span></div>
+    <div class="kpi-value" id="k26-cumpl">—</div>
+    <div class="kpi-sub">Ingresos Netos IIBB Real / Budget</div>
+    <span class="kpi-pill" id="k26-cumpl-pill">—</span>
+  </div>
+</div>
+
+<!-- SECTION 7: ACUMULADO YTD 2026 -->
+<div class="section-bar">ACUMULADO AÑO (YTD)</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Ingresos Acumulados YTD<span class="chart-info">?<span class="info-bubble">Ingresos netos acumulados desde enero hasta el último mes cerrado, comparados contra el acumulado presupuestado. Refleja el cumplimiento del plan en el año.</span></span></h3><div class="chart-wrap"><canvas id="b15"></canvas></div></div>
+  <div class="card"><h3>Egresos Acumulados YTD<span class="chart-info">?<span class="info-bubble">Costos operativos acumulados desde enero, comparados contra el presupuesto acumulado. Permite evaluar la eficiencia del gasto en el año.</span></span></h3><div class="chart-wrap"><canvas id="b16"></canvas></div></div>
+  <div class="card"><h3>Resultado Neto Acumulado YTD<span class="chart-info">?<span class="info-bubble">Resultado neto acumulado desde enero hasta el último mes cerrado, versus el presupuesto acumulado. Indica la rentabilidad total del período.</span></span></h3><div class="chart-wrap"><canvas id="b17"></canvas></div></div>
+</div>
+
+<!-- SECTION 8: MÁRGENES 2026 -->
+<div class="section-bar">EVOLUCIÓN DE MÁRGENES</div>
+<div class="row-3col-narrow">
+  <div class="card"><h3>Margen Bruto % Mensual<span class="chart-info">?<span class="info-bubble">Porcentaje de margen bruto mensual: (Ingresos − Costos Directos) / Ingresos. Mide la eficiencia operativa antes de otros egresos.</span></span></h3><div class="chart-wrap"><canvas id="b18"></canvas></div></div>
+  <div class="card"><h3>Margen Neto % Mensual<span class="chart-info">?<span class="info-bubble">Porcentaje de margen neto mensual: Resultado Neto / Ingresos. Refleja la rentabilidad final del negocio después de todos los costos y egresos.</span></span></h3><div class="chart-wrap"><canvas id="b19"></canvas></div></div>
+  <div class="card"><h3>Cascada YTD<span class="chart-info">?<span class="info-bubble">Descomposición del resultado acumulado: desde los ingresos brutos, restando IIBB, costos directos y otros egresos hasta el resultado neto del período.</span></span></h3><div class="chart-wrap-tall"><canvas id="b20"></canvas></div></div>
+</div>
+
+
+</div><!-- dash-body -->
+</div><!-- page-2026 -->
+
+</div><!-- dashboard-root -->
+
+<script>
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(year) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + year).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// CHART REGISTRY — all Chart instances stored here for toggle
+// ============================================================
+const CHARTS = {};   // key → Chart instance
+const BUD_STATE = { '25': false, '26': false };  // false = showing all budget
+
+// For 2025: ALL 12 months have real data → "no-real months" = none → button hides nothing
+// For 2026: months 2-11 (index) have no real data → Budget bars on those months get nulled
+// realCount per year:
+const REAL_COUNT = { '25': 12, '26': 5 };
+
+function toggleBudget(yr) {
+  const btn   = document.getElementById('btn-bud-' + yr);
+  const hide  = !BUD_STATE[yr];   // if currently showing → now hide
+  BUD_STATE[yr] = hide;
+
+  btn.classList.toggle('active', hide);
+  btn.innerHTML = `<span class="dot"></span> ${hide ? 'Mostrar Budget completo' : 'Ocultar Budget sin Real'}`;
+
+  const realN = REAL_COUNT[yr];
+
+  // iterate every registered chart for this year
+  Object.entries(CHARTS).forEach(([id, chart]) => {
+    if (!id.startsWith(yr === '25' ? 'c' : 'b')) return;
+    // skip pie (c0/b0) and waterfall (c20/b20)
+    if (id === 'c0' || id === 'b0' || id === 'c20' || id === 'b20') return;
+
+    chart.data.datasets.forEach(ds => {
+      const lbl = (ds.label || '').toLowerCase();
+      const isBudget = lbl.includes('budget') || lbl.includes('bud') || lbl.includes('inflaci');
+      if (!isBudget) return;
+
+      // ds._origData stores the original full array
+      if (!ds._origData) ds._origData = [...ds.data];
+
+      if (hide) {
+        // null out the months beyond realN
+        ds.data = ds._origData.map((v, i) => i < realN ? v : null);
+      } else {
+        ds.data = [...ds._origData];
+      }
+    });
+
+    chart.update('none');  // 'none' = no animation, instant
+  });
+}
+
+// Wrap Chart constructor to auto-register
+const _OrigChart = Chart;
+
+// ============================================================
+// SHARED HELPERS
+// ============================================================
+const DARK_A = 'rgba(7,55,99,0.85)';
+const LIGHT_A = 'rgba(159,197,232,0.85)';
+const DARK_L  = 'rgba(7,55,99,1)';
+const LIGHT_L = 'rgba(159,197,232,1)';
+const GREEN_A = 'rgba(39,118,39,0.75)';
+const GREEN_LIGHT_A = 'rgba(182,215,168,0.85)';
+const GREEN_L = 'rgba(39,118,39,1)';
+const GREEN_LIGHT_L = 'rgba(86,166,86,1)';
+const YELLOW_L = 'rgba(255,214,102,1)';
+
+const fmt = v => {
+  if(v===null||v===undefined||v===0) return '0';
+  const abs = Math.abs(v);
+  if(abs>=1e9) return (v/1e9).toFixed(1)+'B';
+  if(abs>=1e6) return (v/1e6).toFixed(0)+'M';
+  return v.toFixed(0);
+};
+
+const ttip = { callbacks: { label: ctx => ' ' + fmt(ctx.raw) } };
+
+const baseScales = {
+  x: { ticks: { color:'#444', font:{size:8} }, grid: { color:'#eee' } },
+  y: { ticks: { color:'#444', font:{size:8}, callback: v => fmt(v) }, grid: { color:'#eee' } }
+};
+
+function bar(id, datasets, labels) {
+  const ch = new Chart(document.getElementById(id), {
+    type:'bar',
+    data:{ labels: labels, datasets },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{color:'#333',font:{size:9}} }, tooltip: ttip },
+      scales: baseScales }
+  });
+  CHARTS[id] = ch;
+  return ch;
+}
+
+function line(id, datasets, labels) {
+  const ch = new Chart(document.getElementById(id), {
+    type:'line',
+    data:{ labels: labels, datasets },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{color:'#333',font:{size:9}} }, tooltip: ttip },
+      scales: baseScales }
+  });
+  CHARTS[id] = ch;
+  return ch;
+}
+
+// ============================================================
+// DATA 2025
+// ============================================================
+const M25 = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const D = {
+  ing_real:   [1513532240,1389709591,1375179746,1573340737,1632201392,1502722362,1850374058,1698653497,1771237786,1839310126,1736321526,1886923075],
+  ing_budget: [1545713605,1404042058,1266681130,1273822114,1325246941,1373155647,1450512990,1454308735,1512688310,1552094882,1568642258,1598665466],
+  costos_real:[556464464.6,588793473.5,604845617.5,598513887.4,612482182,675288747,843621130,675008448,744928795,713678227,809894246,796033554],
+  costos_bud: [615079670,628899819,605757137,617714077,631565174,658862618,682316890,697129798,710268065,739983128,747702513,761809619],
+  egr_tot_abs:[546408755,653865868,1471318229,837979118,928738867,949538799,1139169957,986852174,1186896483,680673738,1030450016,913231962], // Fuente: fila 187 'TOTAL EGRESOS' del P&L 2025
+  rn_real:    [967123487,735843722,-96138483,735361617,703462525,553182962,711204101,711801323,584341303,1158636388,705871510,973691113],
+  rn_budget:  [578907401,478899926,405682413,402387396,426279575,439172413,473460469,466151626,494959829,500813576,506290790,519410272],
+  ebitda_real:[966519428,804004457,776239814,980733393,1025637737,861108937,1018504741,1045080619,1049787894,1148943716,947114134,1115682957],
+  ebitda_bud: [911109133,757406970,644923846,640017652,676941806,696947907,749873829,738808721,783312604,792506347,801125317,816662179],
+  farm_real:  [1334472681.76,1385045527.18,1383664863.18,1586326722.55,1650536077,1495988012,1842955381,1696717791,1776803898,1836552143,1722502854,1884643392],
+  farm_bud:   [1388099652,1418181519,1272726007,1277549726,1330832665,1380334029,1458871109,1461955606,1522410441,1560786103,1577226189,1607758671],
+  lab_real:   [250246857.59,69334382.09,55420472.23,64927281.47,62075591,79998809,99621314,86341438,87186713,100027568,103276637,110605227],
+  lab_bud:    [229436820,50227008,51092070,53082381,53930839,54859692,56996773,57907797,58905146,61199819,62178024,63248919],
+  med_real:   [8472292,8472292,8472292,8472292,11063120,9859901,9767706,10080925,9767706,11164531,11164532,11164532],
+  med_bud:    [9530481,9530481,9530481,10233276,10233276,10233276,10987897,10987897,10987897,11798164,11798164,11798164],
+  ing_inf:    [1513532240,1549857014,1607201724,1652203372,1676986423,1703818206,1736190752,1769178376,1806331122,1847876738,1894073656,1947107718],
+  egr_inf:    [556464464.6,569819612,590902938,607448220,616559943,626424902,638326975,650455188,664114747,679389386,696374121,715872596],
+  pie_farm: 1884643392, pie_lab: 110605227, pie_med: 11164532,
+  egr_tot_bud: [953492670, 911727528, 847480654, 857810641, 885234768, 920139508, 963095001, 974083067, 1003535118, 1036965758, 1047910802, 1067835050],  // Fila 187 budget — TOTAL EGRESOS P&L 2025
+  mb: [957067775,800916118,770334128,974826850,1019719210,827433615,1006752928,1023645049,1026308991,1125631899,926427280,1090889521],
+  mn: [966209084,735842864,-96137625,735361618,703462525,553233833,711204101,711801323,584341303,1158721442,708663559,973691113],
+};
+
+// 2025 Charts
+bar('c1', [
+  {label:'Ingresos Netos IIBB Reales',data:D.ing_real,backgroundColor:LIGHT_A},
+  {label:'Economico BUDGET',data:D.ing_budget,backgroundColor:DARK_A}
+], M25);
+
+bar('c2', [
+  {label:'Egresos Reales',data:D.egr_tot_abs,backgroundColor:LIGHT_A},
+  {label:'Egresos BUDGET',data:D.egr_tot_bud,backgroundColor:DARK_A}
+], M25);
+
+CHARTS['c3'] = new Chart(document.getElementById('c3'), {
+  type:'bar', data:{ labels:M25, datasets:[
+    {type:'bar',label:'Total Ingresos Netos IIBB',data:D.ing_real,backgroundColor:LIGHT_A,yAxisID:'y',order:2},
+    {type:'bar',label:'Total Egresos',data:D.egr_tot_abs,backgroundColor:DARK_A,yAxisID:'y',order:2},
+    {type:'line',label:'MN',data:D.mn,borderColor:'#FFD666',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#FFD666',tension:0.3,yAxisID:'y',order:0}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#333',font:{size:9}}},tooltip:ttip},scales:baseScales}
+});
+
+CHARTS['c4'] = new Chart(document.getElementById('c4'), {
+  type:'bar', data:{ labels:M25, datasets:[
+    {type:'bar',label:'Total Ingresos Netos IIBB',data:D.ing_real,backgroundColor:LIGHT_A,yAxisID:'y',order:2},
+    {type:'bar',label:'Total Costos',data:D.costos_real,backgroundColor:DARK_A,yAxisID:'y',order:2},
+    {type:'line',label:'MB',data:D.mb,borderColor:'#FFD666',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#FFD666',tension:0.3,yAxisID:'y',order:0}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#333',font:{size:9}}},tooltip:ttip},scales:baseScales}
+});
+
+bar('c5',[{label:'Ingresos Netos IIBB Reales',data:D.ing_real,backgroundColor:LIGHT_A},{label:'Ingresos Netos IIBB Inflación',data:D.ing_inf,backgroundColor:DARK_A}],M25);
+bar('c6',[{label:'Egresos Reales',data:D.egr_tot_abs,backgroundColor:LIGHT_A},{label:'Egresos Inflación',data:D.egr_inf,backgroundColor:DARK_A}],M25);
+bar('c7',[{label:'RN Real',data:D.rn_real,backgroundColor:LIGHT_A},{label:'RN Budget',data:D.rn_budget,backgroundColor:DARK_A}],M25);
+bar('c8',[{label:'EBITDA REAL',data:D.ebitda_real,backgroundColor:LIGHT_A},{label:'EBITDA BUDGET',data:D.ebitda_bud,backgroundColor:DARK_A}],M25);
+bar('c9',[{label:'Real',data:D.farm_real,backgroundColor:LIGHT_A},{label:'BUDGET',data:D.farm_bud,backgroundColor:DARK_A}],M25);
+bar('c10',[{label:'Real',data:D.lab_real,backgroundColor:LIGHT_A},{label:'BUDGET',data:D.lab_bud,backgroundColor:DARK_A}],M25);
+bar('c11',[{label:'Real',data:D.med_real,backgroundColor:LIGHT_A},{label:'BUDGET',data:D.med_bud,backgroundColor:DARK_A}],M25);
+
+new Chart(document.getElementById('c0'), {
+  type:'pie',
+  data:{labels:['Ventas Farmacias','Ventas Laboratorios','Ventas Medicina'],
+    datasets:[{data:[D.pie_farm,D.pie_lab,D.pie_med],backgroundColor:['#073763','#9FC5E8','#FFD666'],borderColor:'#fff',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{color:'#333',font:{size:8},boxWidth:12}},
+    tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${(ctx.parsed/(D.pie_farm+D.pie_lab+D.pie_med)*100).toFixed(1)}%`}}}}
+});
+
+line('c12',[
+  {label:'Ingresos Netos IIBB Reales',data:D.ing_real,borderColor:DARK_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'Ingresos Netos IIBB Budget',data:D.ing_budget,borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M25);
+
+line('c13',[
+  {label:'Ingresos Netos IIBB Reales',data:D.ing_real,borderColor:DARK_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'Ingresos Netos IIBB Budget',data:D.ing_budget,borderColor:'rgba(7,55,99,0.5)',backgroundColor:'transparent',tension:0.3,pointRadius:3,borderDash:[6,3]},
+  {label:'Costos Operativos Reales',data:D.costos_real,borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L},
+  {label:'Costos Operativos Budget',data:D.costos_bud,borderColor:'rgba(159,197,232,0.6)',backgroundColor:'transparent',tension:0.3,pointRadius:3,borderDash:[6,3]}
+],M25);
+
+line('c14',[
+  {label:'Costos Operativos Reales',data:D.costos_real,borderColor:DARK_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'Costos Operativos Budget',data:D.costos_bud,borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M25);
+
+// ============================================================
+// DATA 2026 — Real: Ene-May. Budget: 12 meses completos.
+// null = mes sin dato real (no se dibuja barra/punto Real)
+// ============================================================
+const M26 = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const B = {
+  // Ingresos netos (después de IIBB) — equivalente a ing_real de 2025
+  ing_real:    [1912739270, 1858227962, 2019983812, 2127304943, 2170574043, null,null,null,null,null,null,null],
+  ing_budget:  [1859773328, 1740557612, 1890304879,1988384943,2101741557,2112055558,2333931986,2305221428,2421953181,2537673741,2482355676,2562159964],
+  // Egresos operativos — equivalente a costos_real de 2025
+  costos_real: [753834624,  732033434,  948130564, 763023960, 855648518, null,null,null,null,null,null,null],
+  costos_bud:  [849621085,  811063525,  835249069,898997719,934380254,945862775,1243202263,1015045520,1053763495,1115692490,1110797656,1149723802],
+  // Egresos totales = Ingresos(fila42) - Resultado(fila186) por mes
+  egr_tot_abs: [1019582508, 991391733,  1169660335, 1192791100, 1063310666, null,null,null,null,null,null,null],
+  // Resultado neto
+  rn_real:     [893156762,  866836230,  850323477, 934513843, 1107263377, null,null,null,null,null,null,null],
+  rn_budget:   [656528958,  604101156,  685716277,708031696,758714847,757955308,708904320,838544341,889253296,924217813,891442712,918013505],
+  // Resultado operativo — equivalente a EBITDA de 2025
+  ebitda_real: [1158904645, 1102125249, 1071853248, 1364280983, 1314925525, null,null,null,null,null,null,null],
+  ebitda_bud:  [1010152243, 929494087,  1055055810,1089387225,1167361303,1166192782,1090729723,1290175909,1368189686,1421981251,1371558019,1412436162],
+  // Por negocio
+  farm_real:   [1891706468, 1791176322, 2036545616, 2086424382, 2128162176, null,null,null,null,null,null,null],
+  farm_bud:    [1813160191, 1690467926, 1851024083,1944348108,2062614131,2072375617,2296254841,2264501834,2385708183,2496210476,2433157531,2509545390],
+  lab_real:    [130487817,  154488228,  121457584, 139669305, 149897688, null,null,null,null,null,null,null],
+  lab_bud:     [132613206,  129815244,  126887789,136263153,137319882,138415239,147522572,149053939,150723120,161438439,166261841,173878496],
+  med_real:    [11164532,   36974029,   -12034640, 12034640, 14317410, null,null,null,null,null,null,null],
+  med_bud:     [11882737,   11882737,   11882737,12425521,12425521,12425521,12993099,12993099,12993099,13586602,13586602,13586602],
+  // Comparativa vs budget (equivalente a ing_inf / egr_inf de 2025)
+  ing_inf:     [1912739270, 1858227962, 2019983812, 2110427533, 2170574043, null,null,null,null,null,null,null],
+  egr_inf:     [753834624,  732033434,  948130564, 829734033, 855648518, null,null,null,null,null,null,null],
+  egr_tot_bud: [1203244370,1136456455,1204588602,1280353247,1343026711,1354100249,1625027666,1466677088,1532699885,1613455928,1590912963,1644146459],  // Fila 185 budget — EGRESOS TOTALES P&L 2026
+  // Margen Bruto y Margen Neto para líneas
+  mb:          [1158904645, 1102125249, 1071853248, 1364280983, 1314925525, null,null,null,null,null,null,null],
+  mn:          [893156762,  866836230,  850323477, 934513843, 1107263377, null,null,null,null,null,null,null],
+  pie_farm: 2128162176, pie_lab: 149897688, pie_med: 14317410,
+};
+
+// ── b1: Ingresos Reales vs Budget  (espejo exacto de c1)
+bar('b1',[
+  {label:'Ingresos Netos IIBB Reales',     data:B.ing_real,   backgroundColor:LIGHT_A},
+  {label:'Economico BUDGET', data:B.ing_budget, backgroundColor:DARK_A}
+],M26);
+
+// ── b2: Egresos vs Budget  (espejo de c2)
+bar('b2',[
+  {label:'Egresos Reales',   data:B.egr_tot_abs, backgroundColor:LIGHT_A},
+  {label:'Egresos BUDGET',   data:B.egr_tot_bud, backgroundColor:DARK_A}
+],M26);
+
+// ── b3: Ingresos vs Egresos + línea RN  (espejo de c3)
+CHARTS['b3'] = new Chart(document.getElementById('b3'), {
+  type:'bar', data:{ labels:M26, datasets:[
+    {type:'bar', label:'Total Ingresos Netos IIBB', data:B.ing_real,    backgroundColor:LIGHT_A, yAxisID:'y',order:2},
+    {type:'bar', label:'Total Egresos',  data:B.egr_tot_abs, backgroundColor:DARK_A,  yAxisID:'y',order:2},
+    {type:'line',label:'MN',             data:B.mn,          borderColor:'#FFD666',backgroundColor:'transparent',
+     borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#FFD666',tension:0.3,yAxisID:'y',spanGaps:false,order:0}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},tooltip:ttip},scales:baseScales}
+});
+
+// ── b4: Ingresos vs Costos + línea MB  (espejo de c4)
+CHARTS['b4'] = new Chart(document.getElementById('b4'), {
+  type:'bar', data:{ labels:M26, datasets:[
+    {type:'bar', label:'Total Ingresos Netos IIBB', data:B.ing_real,    backgroundColor:LIGHT_A, yAxisID:'y',order:2},
+    {type:'bar', label:'Costos Operativos',   data:B.costos_real, backgroundColor:DARK_A,  yAxisID:'y',order:2},
+    {type:'line',label:'MB',             data:B.mb,          borderColor:'#FFD666',backgroundColor:'transparent',
+     borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#FFD666',tension:0.3,yAxisID:'y',spanGaps:false,order:0}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},tooltip:ttip},scales:baseScales}
+});
+
+// ── b5: Ingresos vs Budget  (espejo de c5 — reemplaza inflación por budget)
+bar('b5',[
+  {label:'Ingresos Netos IIBB Reales',  data:B.ing_inf,    backgroundColor:LIGHT_A},
+  {label:'Ingresos Netos IIBB Budget',  data:B.ing_budget, backgroundColor:DARK_A}
+],M26);
+
+// ── b6: Egresos vs Budget  (espejo de c6)
+bar('b6',[
+  {label:'Egresos Reales',   data:B.egr_tot_abs,   backgroundColor:LIGHT_A},
+  {label:'Egresos Budget',   data:B.egr_tot_bud, backgroundColor:DARK_A}
+],M26);
+
+// ── b7: Resultado Neto Real vs Budget  (espejo de c7)
+bar('b7',[
+  {label:'RN Real',   data:B.rn_real,   backgroundColor:LIGHT_A},
+  {label:'RN Budget', data:B.rn_budget, backgroundColor:DARK_A}
+],M26);
+
+// ── b8: Resultado Operativo Real vs Budget  (espejo de c8 — EBITDA)
+bar('b8',[
+  {label:'Resultado Op. REAL',   data:B.ebitda_real, backgroundColor:LIGHT_A},
+  {label:'Resultado Op. BUDGET', data:B.ebitda_bud,  backgroundColor:DARK_A}
+],M26);
+
+// ── b9: Farmacias  (espejo de c9)
+bar('b9',[
+  {label:'Real',   data:B.farm_real, backgroundColor:LIGHT_A},
+  {label:'BUDGET', data:B.farm_bud,  backgroundColor:DARK_A}
+],M26);
+
+// ── b10: Laboratorios  (espejo de c10)
+bar('b10',[
+  {label:'Real',   data:B.lab_real, backgroundColor:LIGHT_A},
+  {label:'BUDGET', data:B.lab_bud,  backgroundColor:DARK_A}
+],M26);
+
+// ── b11: Medicina  (espejo de c11)
+bar('b11',[
+  {label:'Real',   data:B.med_real, backgroundColor:LIGHT_A},
+  {label:'BUDGET', data:B.med_bud,  backgroundColor:DARK_A}
+],M26);
+
+// ── b0: Pie Composición Feb  (espejo de c0)
+new Chart(document.getElementById('b0'), {
+  type:'pie',
+  data:{labels:['Ventas Farmacias','Ventas Laboratorios','Ventas Medicina'],
+    datasets:[{data:[B.pie_farm,B.pie_lab,B.pie_med],
+      backgroundColor:['#073763','#9FC5E8','#FFD666'],borderColor:'#fff',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{color:'#333',font:{size:8},boxWidth:12}},
+    tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${(ctx.parsed/(B.pie_farm+B.pie_lab+B.pie_med)*100).toFixed(1)}%`}}}}
+});
+
+// ── b12: Ingresos vs Budget LINE  (espejo de c12)
+line('b12',[
+  {label:'Ingresos Netos IIBB Reales', data:B.ing_real,   borderColor:DARK_L, backgroundColor:'transparent',
+   tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'Ingresos Netos IIBB Budget', data:B.ing_budget, borderColor:LIGHT_L,backgroundColor:'transparent',
+   tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M26);
+
+// ── b13: Ingresos + Costos vs Budget LINE  (espejo de c13)
+line('b13',[
+  {label:'Ingresos Netos IIBB Reales', data:B.ing_real,    borderColor:DARK_L, backgroundColor:'transparent',
+   tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'Ingresos Netos IIBB Budget', data:B.ing_budget,  borderColor:'rgba(7,55,99,0.5)',backgroundColor:'transparent',
+   tension:0.3,pointRadius:3,borderDash:[6,3]},
+  {label:'Costos Operativos Reales',   data:B.costos_real, borderColor:LIGHT_L,backgroundColor:'transparent',
+   tension:0.3,pointRadius:4,pointBackgroundColor:LIGHT_L,spanGaps:false},
+  {label:'Costos Operativos Budget',   data:B.costos_bud,  borderColor:'rgba(159,197,232,0.6)',backgroundColor:'transparent',
+   tension:0.3,pointRadius:3,borderDash:[6,3]}
+],M26);
+
+// ── b14: Costos vs Budget LINE  (espejo de c14)
+line('b14',[
+  {label:'Costos Reales', data:B.costos_real, borderColor:DARK_L, backgroundColor:'transparent',
+   tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'Costos Budget', data:B.costos_bud,  borderColor:LIGHT_L,backgroundColor:'transparent',
+   tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M26);
+
+// ============================================================
+// TABLA PAMI — helper
+// ============================================================
+function fmtDolar(v) {
+  if (v === null || v === undefined) return '—';
+  const neg = v < 0;
+  const abs = Math.abs(v);
+  let s;
+  if (abs >= 1e9) s = '$' + (abs / 1e9).toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' B';
+  else if (abs >= 1e6) s = '$' + (abs / 1e6).toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' M';
+  else s = '$' + abs.toLocaleString('en-US', {minimumFractionDigits:3, maximumFractionDigits:3});
+  return (neg ? '-' : '') + s;
+}
+function fmtDolarFull(v) {
+  if (v === null || v === undefined) return '—';
+  const neg = v < 0;
+  const abs = Math.abs(v);
+  const s = '$' + abs.toLocaleString('en-US', {minimumFractionDigits:3, maximumFractionDigits:3});
+  return (neg ? '-' : '') + s;
+}
+function fmtPct2(v) {
+  if (v === null || v === undefined || !isFinite(v)) return '—';
+  return (v * 100).toFixed(2) + '%';
+}
+function buildPamiTable(tbodyId, rows, nota) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  let html = '';
+  rows.forEach(r => {
+    const neg = cls => cls < 0 ? 'neg' : '';
+    html += `<tr class="${r.cls || ''}">
+      <td class="td-label">${r.label}</td>
+      <td>${fmtDolarFull(r.ing)}</td>
+      <td>${fmtDolarFull(r.costos)}</td>
+      <td>${fmtDolarFull(r.egresos)}</td>
+      <td class="${r.resultado < 0 ? 'neg':''}">${fmtDolarFull(r.resultado)}</td>
+      <td class="${r.mb_real < 0 ? 'neg':''}">${fmtPct2(r.mb_real)}</td>
+      <td>${r.mb_bud !== null ? fmtPct2(r.mb_bud) : '<span style="color:#aaa">N/D</span>'}</td>
+      <td class="${r.mn_real < 0 ? 'neg':''}">${fmtPct2(r.mn_real)}</td>
+      <td>${r.mn_bud !== null ? fmtPct2(r.mn_bud) : '<span style="color:#aaa">N/D</span>'}</td>
+    </tr>`;
+  });
+  if (nota) {
+    html += `<tr><td colspan="9" style="text-align:center;font-size:8px;color:#555;padding:5px 8px;font-style:italic;background:#fffbe6;border-top:2px solid #073763;">${nota}</td></tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+// ── 2025 TABLE ───────────────────────────────────────────────
+(function(){
+
+  // ══ CON PAMI — REAL ══════════════════════════════════════
+  // Ingresos:  U36
+  // Costos:    U170
+  // Egresos:   U172 - U187
+  // Resultado: U187
+  // MB%: U173  |  MB Budget%: AJ173
+  // MN%: U188  |  MN Budget%: AJ188
+  const cp_ing      = 19_769_505_534.00;
+  const cp_cos      =  8_221_553_760.00;
+  const cp_egr      =  3_103_570_206.00;
+  const cp_res      =  8_444_381_568.00;
+  const cp_mb_real  = 0.5841295198;
+  const cp_mb_bud   = 0.5200194926;
+  const cp_mn_real  = 0.4271417691;
+  const cp_mn_bud   = 0.33801267;
+
+  // ══ SIN PAMI — REAL ══════════════════════════════════════
+  // Ingresos:  (U34 - U14) * 0.95
+  // Costos:    U170 - U167
+  // MB:        Ingresos - Costos
+  // Egresos:   MB * 35%
+  // Resultado: MB * 65%
+  // MB%:       MB / Ingresos
+  // MN%:       Resultado / Ingresos
+  const sp25_ing_r  = 5659899107.30;   // Ventas SinPami Reales 2025 acumulado Dic
+  const sp25_cos_r  = 4723447218.00;   // Costos SinFrontier 2025 acumulado Dic
+  const sp25_mb_r   = sp25_ing_r - sp25_cos_r;
+  const sp25_egr_r  = sp25_mb_r * 0.35;
+  const sp25_res_r  = sp25_mb_r - sp25_egr_r;
+
+  // ══ SIN PAMI — BUDGET ════════════════════════════════════
+  const sp_mb_bud   = 0.0364;   //  3.64%
+  const sp_mn_bud   = 0.0240;   //  2.40%
+
+  buildPamiTable('tbody-pami-25', [
+    {
+      label: 'Números CON PAMI', cls: 'tr-total',
+      ing:       cp_ing,
+      costos:    cp_cos,
+      egresos:   cp_egr,
+      resultado: cp_res,
+      mb_real:   cp_mb_real,
+      mb_bud:    cp_mb_bud,
+      mn_real:   cp_mn_real,
+      mn_bud:    cp_mn_bud,
+    },
+    {
+      label: 'Números SIN PAMI', cls: 'tr-sp',
+      ing:       sp25_ing_r,
+      costos:    sp25_cos_r,
+      egresos:   sp25_egr_r,
+      resultado: sp25_res_r,
+      mb_real:   sp25_mb_r / sp25_ing_r,
+      mb_bud:    sp_mb_bud,
+      mn_real:   sp25_res_r / sp25_ing_r,
+      mn_bud:    sp_mn_bud,
+    },
+  ], 'NOTA: LOS NÚMEROS SIN PAMI SON LOS COSTOS SIN FRONTIER Y EN EGRESOS SOLO SE CONTEMPLA EL 35% DEL MARGEN BRUTO');
+})();
+
+// ── 2026 TABLE ───────────────────────────────────────────────
+(function(){
+
+  // ══ CON PAMI — REAL ══════════════════════════════════════
+  // Ingresos:  V42
+  // Costos:    V169
+  // Egresos:   -(V174+V176+V178+V180+V182+V184)
+  // Resultado: V171-V174-V176-V178-V180-V182-V184  (= V186)
+  // MB%: V172  |  MB Budget%: AK172
+  // MN%: V187  |  MN Budget%: AK187
+  const cp_ing      = 10_088_830_029.00;
+  const cp_cos      =  4_052_671_099.00;
+  const cp_egr      =  1_384_065_241.00;
+  const cp_res      =  4_652_093_689.00;
+  const cp_mb_real  = 0.5983011818;
+  const cp_mb_bud   = 0.5481245116;
+  const cp_mn_real  = 0.4611132981;
+  const cp_mn_bud   = 0.3562444010;
+
+  // ══ SIN PAMI — REAL ══════════════════════════════════════
+  // Ingresos:  (V40-V14-V15) * 0.95
+  // Costos:    V169 - AK164
+  // MB:        Ingresos - Costos
+  // Egresos:   MB * 35%
+  // Resultado: MB - Egresos  (= MB * 65%)
+  // MB%:       MB / Ingresos
+  // MN%:       Resultado / Ingresos
+  const sp_ing_r    = 3013353040.00;   // R206 V (Acum May)
+  const sp_cos_r    = 2254412484.00;   // R207 V (Acum May)
+  const sp_mb_r     = sp_ing_r - sp_cos_r;           // 758,940,556  (R208 V)
+  const sp_egr_r    = sp_mb_r * 0.35;                // 265,629,195  (R210 V)
+  const sp_res_r    = sp_mb_r - sp_egr_r;            // 493,311,362  (R211 V)
+
+  // ══ SIN PAMI — BUDGET ════════════════════════════════════
+  // Ingresos:  (AK40-AK14-AK15) * 0.95
+  // Costos:    AK169 - AK164
+  // Egresos:   0
+  // Resultado: Ingresos - Costos
+  // MB%/MN%:   sobre Ingresos budget
+  const sp_ing_b    = 2810481340.00;   // R206 AK (Acum May budget)
+  const sp_cos_b    = 2517917251.00;   // R207 AK (Acum May budget)
+  const sp_mb_b     = sp_ing_b - sp_cos_b;           // 292,564,089  (R208 AK)
+  const sp_egr_b    = sp_mb_b * 0.35;                // 102,397,431  (R210 AK)
+  const sp_res_b    = sp_mb_b - sp_egr_b;            // 190,166,658  (R211 AK)
+
+  buildPamiTable('tbody-pami-26', [
+    {
+      label: 'Números CON PAMI', cls: 'tr-total',
+      ing:       cp_ing,
+      costos:    cp_cos,
+      egresos:   cp_egr,
+      resultado: cp_res,
+      mb_real:   cp_mb_real,
+      mb_bud:    cp_mb_bud,
+      mn_real:   cp_mn_real,
+      mn_bud:    cp_mn_bud,
+    },
+    {
+      label: 'Números SIN PAMI', cls: 'tr-sp',
+      ing:       sp_ing_r,
+      costos:    sp_cos_r,
+      egresos:   sp_egr_r,
+      resultado: sp_res_r,
+      mb_real:   sp_mb_r / sp_ing_r,
+      mb_bud:    sp_mb_b / sp_ing_b,
+      mn_real:   sp_res_r / sp_ing_r,
+      mn_bud:    sp_res_b / sp_ing_b,
+    },
+  ], 'NOTA: LOS NÚMEROS SIN PAMI SON LOS COSTOS SIN FRONTIER Y EN EGRESOS SOLO SE CONTEMPLA IMPUESTOS A LAS GANANCIAS Y TASA DE HIGIENE');
+})();
+
+// ============================================================
+function cumSum(arr) {
+  let s = 0; 
+  return arr.map(v => v === null ? null : (s += v, s));
+}
+function pct(v) { return (v*100).toFixed(1)+'%'; }
+function fmtM(v) {
+  if(v===null||v===undefined) return '0';
+  const a = Math.abs(v);
+  if(a>=1e9) return (v/1e9).toFixed(2)+'B';
+  if(a>=1e6) return (v/1e6).toFixed(0)+'M';
+  return v.toFixed(0);
+}
+function pill(el, val, budget) {
+  const diff = (val - budget) / Math.abs(budget);
+  const cls = diff >= 0.02 ? 'green' : diff <= -0.02 ? 'red' : 'yellow';
+  const sign = diff >= 0 ? '+' : '';
+  el.textContent = sign + (diff*100).toFixed(1) + '%';
+  el.className = 'kpi-pill ' + cls;
+}
+
+// ============================================================
+// KPI 2025
+// ============================================================
+(function(){
+  const ingYTD  = D.ing_real.reduce((a,b)=>a+b,0);
+  const ingBYTD = D.ing_budget.reduce((a,b)=>a+b,0);
+  const rnYTD   = D.rn_real.reduce((a,b)=>a+b,0);
+  const rnBYTD  = D.rn_budget.reduce((a,b)=>a+b,0);
+  const lastIng = D.ing_real[11];
+  const lastRN  = D.rn_real[11];
+  const lastEB  = D.ebitda_real[11];
+  const mnPct   = lastRN / lastIng;
+  const ebPct   = lastEB / lastIng;
+  const cumpl   = ingYTD / ingBYTD;
+
+  document.getElementById('k25-ing-ytd').textContent  = fmtM(ingYTD);
+  document.getElementById('k25-rn-ytd').textContent   = fmtM(rnYTD);
+  document.getElementById('k25-mn-pct').textContent   = pct(mnPct);
+  document.getElementById('k25-ebitda-pct').textContent = pct(ebPct);
+  document.getElementById('k25-cumpl').textContent    = pct(cumpl);
+
+  pill(document.getElementById('k25-ing-pct'),   ingYTD,  ingBYTD);
+  pill(document.getElementById('k25-rn-pct'),    rnYTD,   rnBYTD);
+  const mnEl = document.getElementById('k25-mn-pill');
+  mnEl.textContent = mnPct >= 0.45 ? '▲ Sobre objetivo' : mnPct >= 0.35 ? '~ En rango' : '▼ Bajo objetivo';
+  mnEl.className = 'kpi-pill ' + (mnPct >= 0.45 ? 'green' : mnPct >= 0.35 ? 'yellow' : 'red');
+  const ebEl = document.getElementById('k25-ebitda-pill');
+  ebEl.textContent = ebPct >= 0.55 ? '▲ Sobre objetivo' : ebPct >= 0.45 ? '~ En rango' : '▼ Bajo objetivo';
+  ebEl.className = 'kpi-pill ' + (ebPct >= 0.55 ? 'green' : ebPct >= 0.45 ? 'yellow' : 'red');
+  const cpEl = document.getElementById('k25-cumpl-pill');
+  cpEl.textContent = cumpl >= 1 ? '▲ Sobre Budget' : cumpl >= 0.97 ? '~ Dentro rango' : '▼ Bajo Budget';
+  cpEl.className = 'kpi-pill ' + (cumpl >= 1 ? 'green' : cumpl >= 0.97 ? 'yellow' : 'red');
+})();
+
+// ── YTD 2025 ────────────────────────────────────────────────
+const ingCum25  = cumSum(D.ing_real);
+const ingBCum25 = cumSum(D.ing_budget);
+const egrCum25  = cumSum(D.egr_tot_abs);
+const egrBCum25 = cumSum(D.egr_tot_bud);  // budget egresos totales
+const rnCum25   = cumSum(D.rn_real);
+const rnBCum25  = cumSum(D.rn_budget);
+
+line('c15',[
+  {label:'Ingresos Netos IIBB Acum. Real',  data:ingCum25,  borderColor:DARK_L, backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'Ingresos Netos IIBB Acum. Budget',data:ingBCum25, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M25);
+line('c16',[
+  {label:'Egresos Acum. Real',  data:egrCum25,  borderColor:DARK_L, backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'Egresos Acum. Budget',data:egrBCum25, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M25);
+line('c17',[
+  {label:'RN Acumulado Real',  data:rnCum25,  borderColor:DARK_L, backgroundColor:'rgba(7,55,99,0.08)',fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:DARK_L},
+  {label:'RN Acumulado Budget',data:rnBCum25, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M25);
+
+// ── MÁRGENES 2025 ────────────────────────────────────────────
+const mb25pct = D.ing_real.map((v,i) => v ? +((D.mb[i]/v)*100).toFixed(1) : null);
+const mn25pct = D.ing_real.map((v,i) => v ? +((D.mn[i]/v)*100).toFixed(1) : null);
+
+const pctScales = {
+  x: { ticks:{color:'#444',font:{size:8}}, grid:{color:'#eee'} },
+  y: { min:0, max:100, ticks:{color:'#444',font:{size:8},callback:v=>v+'%'}, grid:{color:'#eee'} }
+};
+
+new Chart(document.getElementById('c18'), {
+  type:'line',
+  data:{ labels:M25, datasets:[
+    {label:'Margen Bruto %', data:mb25pct, borderColor:DARK_L, backgroundColor:'rgba(7,55,99,0.07)',
+     fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:DARK_L}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'%'}}},
+    scales:pctScales}
+});
+
+new Chart(document.getElementById('c19'), {
+  type:'line',
+  data:{ labels:M25, datasets:[
+    {label:'Margen Neto %', data:mn25pct, borderColor:LIGHT_L, backgroundColor:'rgba(159,197,232,0.12)',
+     fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:LIGHT_L}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'%'}}},
+    scales:pctScales}
+});
+
+// ── CASCADA 2025 (Anual) ─────────────────────────────────────
+(function(){
+  const ing25     = D.ing_real.reduce((a,b)=>a+b,0);
+  const iibb25    = 1_113_688_217;   // U35 del P&L 2025 (valor absoluto)
+  const egr25     = D.costos_real.reduce((a,b)=>a+b,0);
+  const egrTot25  = D.egr_tot_abs.reduce((a,b)=>a+b,0);
+  const rn25      = D.rn_real.reduce((a,b)=>a+b,0);
+  const otrosCostos = egrTot25 - egr25;
+
+  // Cascada: Ingresos brutos → -IIBB → -Costos Directos → -Otros Egresos → Resultado Neto
+  const ing_bruto = ing25 + iibb25;   // ingresos antes de IIBB
+  const labels = ['Ingresos Brutos','IIBB','Costos Directos','Otros Egresos','Resultado Neto'];
+  const bases  = [
+    0,
+    ing_bruto - iibb25,                                       // base IIBB
+    ing25 - egr25,                                            // base Costos Directos
+    ing25 - egr25 - Math.max(0, otrosCostos),                 // base Otros Egresos
+    0                                                         // base Resultado
+  ];
+  const vals   = [ing_bruto, -iibb25, -egr25, -Math.max(0, otrosCostos), rn25];
+  const colors = ['#073763','rgba(159,197,232,0.6)','rgba(159,197,232,0.9)','rgba(159,197,232,0.6)','#FFD666'];
+
+  new Chart(document.getElementById('c20'), {
+    type:'bar',
+    data:{ labels,
+      datasets:[
+        {label:'Base', data:bases, backgroundColor:'transparent', borderWidth:0},
+        {label:'Valor', data:vals.map(Math.abs), backgroundColor:colors, borderWidth:0}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label: ctx => ctx.datasetIndex===1 ? ' '+fmtM(vals[ctx.dataIndex]) : null}}
+      },
+      scales:{
+        x:{ticks:{color:'#444',font:{size:8}},grid:{color:'#eee'},stacked:true},
+        y:{ticks:{color:'#444',font:{size:8},callback:v=>fmtM(v)},grid:{color:'#eee'},stacked:true}
+      }
+    }
+  });
+})();
+
+// ============================================================
+// KPI 2026
+// ============================================================
+(function(){
+  const realMonths = 5; // Ene + Feb + Mar + Abr + May
+  const ingR  = B.ing_real.slice(0,realMonths).reduce((a,b)=>a+(b||0),0);
+  const ingBud= B.ing_budget.slice(0,realMonths).reduce((a,b)=>a+(b||0),0);
+  const rnR   = B.rn_real.slice(0,realMonths).reduce((a,b)=>a+(b||0),0);
+  const rnBud = B.rn_budget.slice(0,realMonths).reduce((a,b)=>a+(b||0),0);
+  const lastIng= B.ing_real[realMonths-1];
+  const lastRN = B.rn_real[realMonths-1];
+  const lastRO = B.ebitda_real[realMonths-1];
+  const mnPct  = lastRN / lastIng;
+  const roPct  = lastRO / lastIng;
+  const cumpl  = ingR / ingBud;
+
+  document.getElementById('k26-ing-ytd').textContent   = fmtM(ingR);
+  document.getElementById('k26-rn-ytd').textContent    = fmtM(rnR);
+  document.getElementById('k26-mn-pct').textContent    = pct(mnPct);
+  document.getElementById('k26-ebitda-pct').textContent= pct(roPct);
+  document.getElementById('k26-cumpl').textContent     = pct(cumpl);
+
+  pill(document.getElementById('k26-ing-pct'),  ingR,  ingBud);
+  pill(document.getElementById('k26-rn-pct'),   rnR,   rnBud);
+  const mnEl = document.getElementById('k26-mn-pill');
+  mnEl.textContent = mnPct >= 0.45 ? '▲ Sobre objetivo' : mnPct >= 0.35 ? '~ En rango' : '▼ Bajo objetivo';
+  mnEl.className = 'kpi-pill ' + (mnPct >= 0.45 ? 'green' : mnPct >= 0.35 ? 'yellow' : 'red');
+  const roEl = document.getElementById('k26-ebitda-pill');
+  roEl.textContent = roPct >= 0.55 ? '▲ Sobre objetivo' : roPct >= 0.45 ? '~ En rango' : '▼ Bajo objetivo';
+  roEl.className = 'kpi-pill ' + (roPct >= 0.55 ? 'green' : roPct >= 0.45 ? 'yellow' : 'red');
+  const cpEl = document.getElementById('k26-cumpl-pill');
+  cpEl.textContent = cumpl >= 1 ? '▲ Sobre Budget' : cumpl >= 0.97 ? '~ Dentro rango' : '▼ Bajo Budget';
+  cpEl.className = 'kpi-pill ' + (cumpl >= 1 ? 'green' : cumpl >= 0.97 ? 'yellow' : 'red');
+})();
+
+// ── YTD 2026 ────────────────────────────────────────────────
+const ingCum26  = cumSum(B.ing_real);
+const ingBCum26 = cumSum(B.ing_budget);
+const egrCum26  = cumSum(B.egr_tot_abs);
+const egrBCum26 = cumSum(B.egr_tot_bud);  // budget egresos totales
+const rnCum26   = cumSum(B.rn_real);
+const rnBCum26  = cumSum(B.rn_budget);
+
+line('b15',[
+  {label:'Ingresos Netos IIBB Acum. Real',  data:ingCum26,  borderColor:DARK_L, backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'Ingresos Netos IIBB Acum. Budget',data:ingBCum26, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M26);
+line('b16',[
+  {label:'Egresos Acum. Real',  data:egrCum26,  borderColor:DARK_L, backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'Egresos Acum. Budget',data:egrBCum26, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M26);
+line('b17',[
+  {label:'RN Acumulado Real',  data:rnCum26,  borderColor:DARK_L, backgroundColor:'rgba(7,55,99,0.08)',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:DARK_L,spanGaps:false},
+  {label:'RN Acumulado Budget',data:rnBCum26, borderColor:LIGHT_L,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:LIGHT_L,borderDash:[6,3]}
+],M26);
+
+// ── MÁRGENES 2026 ────────────────────────────────────────────
+const mb26pct = B.ing_real.map((v,i) => v ? +((B.ebitda_real[i]/v)*100).toFixed(1) : null);
+const mn26pct = B.ing_real.map((v,i) => v ? +((B.rn_real[i]/v)*100).toFixed(1) : null);
+
+new Chart(document.getElementById('b18'), {
+  type:'line',
+  data:{ labels:M26, datasets:[
+    {label:'Margen Bruto %', data:mb26pct, borderColor:DARK_L, backgroundColor:'rgba(7,55,99,0.07)',
+     fill:true, tension:0.3, pointRadius:5, pointBackgroundColor:DARK_L, spanGaps:false}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'%'}}},
+    scales:pctScales}
+});
+
+new Chart(document.getElementById('b19'), {
+  type:'line',
+  data:{ labels:M26, datasets:[
+    {label:'Margen Neto %', data:mn26pct, borderColor:LIGHT_L, backgroundColor:'rgba(159,197,232,0.12)',
+     fill:true, tension:0.3, pointRadius:5, pointBackgroundColor:LIGHT_L, spanGaps:false}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#333',font:{size:9}}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'%'}}},
+    scales:pctScales}
+});
+
+// ── CASCADA 2026 (YTD Ene-May) ───────────────────────────────
+(function(){
+  const NR = REAL_COUNT['26'];                // meses reales (Ene-May = 5)
+  const ingR   = B.ing_real.slice(0,NR).reduce((a,b)=>a+(b||0),0);
+  const iibb26 = 603641527;   // V41 acum Ene-May (valor absoluto)
+  const egrR   = B.costos_real.slice(0,NR).reduce((a,b)=>a+(b||0),0);
+  const rnR    = B.rn_real.slice(0,NR).reduce((a,b)=>a+(b||0),0);
+  const otros  = ingR - egrR - rnR;
+
+  // Cascada: Ingresos brutos → -IIBB → -Costos Directos → -Otros Egresos → Resultado Neto
+  const ing_bruto = ingR + iibb26;
+  const labels = ['Ingresos Brutos','IIBB','Costos Directos','Otros Egresos','Resultado Neto'];
+  const bases  = [
+    0,
+    ing_bruto - iibb26,
+    ingR - egrR,
+    ingR - egrR - Math.max(0, otros),
+    0
+  ];
+  const vals   = [ing_bruto, -iibb26, -egrR, -Math.max(0, otros), rnR];
+  const colors = ['#073763','rgba(159,197,232,0.6)','rgba(159,197,232,0.9)','rgba(159,197,232,0.6)','#FFD666'];
+
+  new Chart(document.getElementById('b20'), {
+    type:'bar',
+    data:{ labels,
+      datasets:[
+        {label:'Base', data:bases, backgroundColor:'transparent', borderWidth:0},
+        {label:'Valor', data:vals.map(Math.abs), backgroundColor:colors, borderWidth:0}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label: ctx => ctx.datasetIndex===1 ? ' '+fmtM(vals[ctx.dataIndex]) : null}}
+      },
+      scales:{
+        x:{ticks:{color:'#444',font:{size:8}},grid:{color:'#eee'},stacked:true},
+        y:{ticks:{color:'#444',font:{size:8},callback:v=>fmtM(v)},grid:{color:'#eee'},stacked:true}
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
