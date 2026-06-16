@@ -10,7 +10,6 @@ construido con Chart.js.
 | Archivo | Descripción |
 |---|---|
 | `Dashboard - WS - MAY26.html` | **Último dashboard vigente** — Real Ene–May 2026 + Budget Jun–Dic. |
-| `Dashboard - WS - MAY26 - DEMO.html` | Versión ilustrativa (presentaciones externas). |
 | `Dashboard_WS_ABR26.html` | Dashboard del mes anterior (Abril 2026), base del actual. |
 | `Economico_y_PL_052026_vs_BDGT.xlsx` | P&L fuente de Mayo 2026 (hoja `REAL-BDGT2026`). |
 | `Economico_y_PL_042026_vs_BDGT.xlsx` | P&L fuente de Abril 2026. |
