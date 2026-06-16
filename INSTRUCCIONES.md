@@ -8,13 +8,13 @@ correcciones acordadas en el proyecto.
 - Grupo con 3 unidades de negocio: **Farmacias, Laboratorio, Medicina**.
 - Dashboard = HTML único con dos pestañas: **2025** (cerrado Ene–Dic, foto fija) y
   **2026** (en curso).
-- Siempre dos versiones: archivo **real** (`DASHBOARD - WS - <MES> <AÑO>.html`) y archivo
+- Siempre dos versiones: archivo **real** (`Dashboard- WS - <MES> <AÑO>.html`) y archivo
   **DEMO** (ilustrativo, generado desde el real). Ver §10 para la convención de nombres.
 
 ## 2. Archivos a proveer cada mes
 
 - P&L del mes: `Economico_y_PL_MM2026_vs_BDGT.xlsx`, hoja **`REAL-BDGT2026`**.
-- Dashboard del mes anterior (`DASHBOARD - WS - <MES> <AÑO>.html` real, no el DEMO).
+- Dashboard del mes anterior (`Dashboard- WS - <MES> <AÑO>.html` real, no el DEMO).
 
 ## 3. Mapa de columnas (hoja REAL-BDGT2026)
 
@@ -120,8 +120,8 @@ meses (verificar igualmente contra cols X..AI).
 
 ## 10. Nombres de archivo  ⬅️ CONVENCIÓN VIGENTE
 
-- Real: **`DASHBOARD - WS - <MES> <AÑO>.html`** (ej. `DASHBOARD - WS - MAYO 2026.html`).
-- Demo: **`DASHBOARD - WS - <MES> <AÑO> - DEMO.html`** (siempre generado desde el real).
+- Real: **`Dashboard- WS - <MES> <AÑO>.html`** (ej. `Dashboard- WS - MAYO 2026.html`).
+- Demo: **`Dashboard- WS - <MES> <AÑO> - DEMO.html`** (siempre generado desde el real).
 - `<MES>` en mayúsculas y en español (ENERO, FEBRERO, … DICIEMBRE); `<AÑO>` con 4 dígitos.
 - Si hay correcciones sobre el mismo mes, se sobrescribe el mismo archivo (no se versiona con V01/V02).
 
