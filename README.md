@@ -9,8 +9,8 @@ construido con Chart.js.
 
 | Archivo | Descripción |
 |---|---|
-| `Dashboard- WS - MAYO 2026.html` | **Último dashboard vigente** — Real Ene–May 2026 + Budget Jun–Dic. |
-| `Dashboard- WS - MAYO 2026 - DEMO.html` | Versión ilustrativa (presentaciones externas). |
+| `Dashboard - WS - May26.html` | **Último dashboard vigente** — Real Ene–May 2026 + Budget Jun–Dic. |
+| `Dashboard - WS - May26 - DEMO.html` | Versión ilustrativa (presentaciones externas). |
 | `Dashboard_WS_ABR26.html` | Dashboard del mes anterior (Abril 2026), base del actual. |
 | `Economico_y_PL_052026_vs_BDGT.xlsx` | P&L fuente de Mayo 2026 (hoja `REAL-BDGT2026`). |
 | `Economico_y_PL_042026_vs_BDGT.xlsx` | P&L fuente de Abril 2026. |
@@ -36,5 +36,5 @@ Mayo (mes): Ingresos Netos $2.171 B · Resultado Neto $1.107 B · MN% 51.0% · M
 ## Cómo actualizar el mes siguiente
 
 Ver [`INSTRUCCIONES.md`](INSTRUCCIONES.md). En resumen: partir del dashboard del mes
-anterior (`Dashboard- WS - <MES> <AÑO>.html`), agregar el nuevo mes a los arrays del objeto `B` (2026), actualizar las
+anterior (`Dashboard - WS - <Mmm><YY>.html`), agregar el nuevo mes a los arrays del objeto `B` (2026), actualizar las
 constantes acumuladas CON/SIN PAMI, los textos de encabezado/KPIs y `REAL_COUNT['26']`.
